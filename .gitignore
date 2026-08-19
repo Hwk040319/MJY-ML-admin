@@ -1,0 +1,9 @@
+data*/
+submissions/
+outputs/
+*.pt
+*.pth
+*.tar
+leaderboard.csv
+private_labels.csv
+__pycache__/
