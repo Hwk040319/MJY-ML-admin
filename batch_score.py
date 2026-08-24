@@ -21,6 +21,7 @@
 
 import argparse
 import csv
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -124,8 +125,20 @@ def main():
         if not ckpt_path.is_file():
             print(f"[{team}] best_model.pt 없음 — 건너뜀 (0점 처리)")
             results.append({"team": team, "macro_f1": 0.0, "accuracy": 0.0,
-                            "note": "체크포인트 없음"})
+                            "submitted_at": float("inf"), "note": "체크포인트 없음"})
             continue
+
+        # 동점 처리용 제출 시각. 파일 수정 시각을 사용하되,
+        # submitted_at.txt (제출 폼 타임스탬프)가 있으면 그것을 우선합니다.
+        stamp_file = team_dir / "submitted_at.txt"
+        if stamp_file.is_file():
+            try:
+                submitted_at = datetime.fromisoformat(
+                    stamp_file.read_text(encoding="utf-8").strip()).timestamp()
+            except ValueError:
+                submitted_at = ckpt_path.stat().st_mtime
+        else:
+            submitted_at = ckpt_path.stat().st_mtime
 
         try:
             model, image_size = load_model(ckpt_path, device)
@@ -134,14 +147,15 @@ def main():
         except Exception as e:
             print(f"[{team}] 채점 실패: {e} — 0점 처리")
             results.append({"team": team, "macro_f1": 0.0, "accuracy": 0.0,
-                            "note": f"오류: {e}"})
+                            "submitted_at": submitted_at, "note": f"오류: {e}"})
             continue
 
         print(f"[{team}] macro_f1={score['macro_f1']:.4f}  "
               f"accuracy={score['accuracy']:.4f}  "
               f"({score['n_scored']}장 채점, 누락 {score['n_missing']}장)")
         results.append({"team": team, "macro_f1": score["macro_f1"],
-                        "accuracy": score["accuracy"], "note": ""})
+                        "accuracy": score["accuracy"],
+                        "submitted_at": submitted_at, "note": ""})
 
     # ---------- 옵션 A: 70 × (팀 F1 / 1위 F1) + 발표 30 ----------
     best_f1 = max((r["macro_f1"] for r in results), default=0.0)
@@ -152,8 +166,9 @@ def main():
         r["presentation_score"] = pres
         r["total_score"] = round(perf + pres, 2)
 
-    # 동점 처리: 총점 -> macro_f1 -> accuracy 순으로 정렬
-    results.sort(key=lambda r: (-r["total_score"], -r["macro_f1"], -r["accuracy"]))
+    # 동점 처리: 총점 -> Macro F1 -> Accuracy -> 제출 시각(빠른 쪽 우선)
+    results.sort(key=lambda r: (-r["total_score"], -r["macro_f1"],
+                                -r["accuracy"], r["submitted_at"]))
     for rank, r in enumerate(results, start=1):
         r["rank"] = rank
 
@@ -161,9 +176,15 @@ def main():
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=[
             "rank", "team", "macro_f1", "accuracy",
-            "performance_score", "presentation_score", "total_score", "note"])
+            "performance_score", "presentation_score", "total_score",
+            "submitted_at", "note"])
         w.writeheader()
-        w.writerows(results)
+        for r in results:
+            row = dict(r)
+            ts = row["submitted_at"]
+            row["submitted_at"] = ("" if ts == float("inf")
+                                   else datetime.fromtimestamp(ts).isoformat(timespec="seconds"))
+            w.writerow(row)
 
     print("\n" + "=" * 70)
     print(f"{'순위':>4} {'팀':>10} {'MacroF1':>9} {'성능점수':>9} {'발표점수':>9} {'총점':>8}")
