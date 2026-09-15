@@ -10,7 +10,7 @@
 python make_lecture_subset.py \
     --data-root data_grouped \
     --output-dir data_lecture \
-    --n-per-class 100
+    --n-exp 4 --per-class 30
 
 # 2) tar 로 묶어 Drive 에 업로드
 tar -cf battery_lecture_sample.tar -C data_lecture train public_val
@@ -22,40 +22,34 @@ tar -cf battery_lecture_sample.tar -C data_lecture train public_val
 > tar -tf battery_train_val.tar | cut -d/ -f1 | sort -u   # train, public_val 두 줄만 나와야 정상
 > ```
 
-## 채점 (2회차 전날)
+## 팀별 Macro F1 확인 (2회차 전날)
 
-제출받은 체크포인트를 팀별 폴더에 정리합니다.
-
-```
-submissions/
-  1조/best_model.pt
-  2조/best_model.pt
-  ...
-```
-
-발표 점수는 CSV 로 준비합니다 (`팀명,발표점수` 헤더, 30점 만점).
+제출받은 체크포인트를 팀별로 `score_checkpoint.py`에 하나씩 돌려 Macro F1을 확인합니다.
 
 ```bash
-python batch_score.py \
-    --submissions-dir submissions \
-    --data-root data_grouped \
-    --private-labels data_grouped/private_test/private_labels.csv \
-    --presentation-scores presentation_scores.csv \
-    --output leaderboard.csv
+python score_checkpoint.py \
+    --checkpoint submissions/1조/best_model.pt \
+    --data-root data_grouped
 ```
 
-순위 계산식은 `성능 70 × (팀 F1 ÷ 1위 F1) + 발표 30` 이며,
-동점 시 Macro F1 → Accuracy 순으로 정렬됩니다.
+콘솔에 그 팀의 `Macro F1`, `Accuracy`, 클래스별 F1이 바로 출력됩니다.
+
+전체 진행 방법(구글 드라이브 데이터 준비, Colab 셀 등)은 [`채점_진행_가이드.md`](채점_진행_가이드.md)를 참고하세요.
+
+> **⚠️ 최종 순위·점수 계산식은 아직 확정 전입니다.** 이전 버전의 `batch_score.py`에 있던
+> "성능 70 × (팀 F1 ÷ 1위 F1) + 발표 30" 공식은 폐기되었습니다 — 확정된 공식이 아니었고
+> 실제로 반영되지 않은 채 방치되어 혼란을 일으켰습니다. 공식이 확정되면 순위·리더보드를
+> 만드는 스크립트를 다시 추가할 예정이며, 그 전까지는 팀별 Macro F1만 `score_checkpoint.py`로
+> 개별 확인하세요.
 
 ## 파일
 
 | 파일 | 역할 |
 |---|---|
 | `make_lecture_subset.py` | 강의용 소규모 샘플 추출 (누수 없이) |
-| `batch_score.py` | 팀별 체크포인트 일괄 채점 + 리더보드 생성 |
-| `predict_test.py` | 단일 체크포인트 예측 (디버깅용) |
-| `verify_submission.py` | CSV 형식 검증 (예비용) |
+| `score_checkpoint.py` | 체크포인트 하나의 Macro F1/Accuracy/클래스별 F1 확인 |
 | `battery_dataset.py`, `common.py` | 참가자 저장소와 동일한 사본 (독립 실행용) |
+| `채점_진행_가이드.md` | 운영진용 실행 가이드 (드라이브 준비 → Colab 실행까지) |
 
 ## 절대 하지 말 것
 
