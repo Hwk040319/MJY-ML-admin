@@ -1,6 +1,10 @@
 # MJY-ML 운영진 전용 도구
 
-**이 저장소는 절대 공개하지 마세요.** 비공개 정답과 채점 로직이 들어 있습니다.
+**⚠️ 현재 이 저장소는 public 상태입니다.** 누구나 코드를 볼 수 있습니다.
+다만 정답 파일(`private_labels.csv`)과 `private_test` 원본 이미지는 이 저장소에 들어있지 않고
+운영진이 별도 경로로만 전달하므로, 코드가 공개되어 있어도 정답 자체가 저장소를 통해 유출되지는 않습니다.
+그래도 앞으로 파일을 추가/수정할 때 정답·개인정보가 절대 커밋되지 않도록 주의하세요.
+되돌리려면(Private 전환) 저장소 Settings에서 소유자 계정으로 직접 변경하면 됩니다.
 참가자용 저장소는 `Hwk040319/MJY-ML` 입니다.
 
 ## 사전 준비 (배포 전)
@@ -26,7 +30,7 @@ tar -cf battery_lecture_sample.tar -C data_lecture train public_val
 
 **가장 쉬운 방법**: [`test_private.ipynb`](test_private.ipynb) 상단의 "Open in Colab" 배지를 눌러 열고,
 안내에 따라 셀을 실행하면 됩니다. 팀의 `best_model.pt`를 업로드하면 바로 Macro F1이 나옵니다.
-전체 절차(구글 드라이브 데이터 준비 등)는 [`채점_진행_가이드.md`](채점_진행_가이드.md)를 참고하세요.
+전체 절차(정답 파일 전달받기, 드라이브 데이터 준비 등)는 [`채점_진행_가이드.md`](채점_진행_가이드.md)를 참고하세요.
 
 로컬/터미널에서 직접 돌리고 싶다면 `score_checkpoint.py`를 씁니다:
 
@@ -51,10 +55,10 @@ python score_checkpoint.py \
 | `score_checkpoint.py` | 체크포인트 하나의 Macro F1/Accuracy/클래스별 F1 확인 |
 | `test_private.ipynb` | 위 스크립트를 Colab에서 바로 실행하는 노트북 (Open in Colab) |
 | `battery_dataset.py`, `common.py` | 참가자 저장소와 동일한 사본 (독립 실행용) |
-| `채점_진행_가이드.md` | 운영진용 실행 가이드 (드라이브 준비 → Colab 실행까지) |
+| `채점_진행_가이드.md` | 운영진용 실행 가이드 (정답 파일 전달받기 → Colab 실행까지) |
 
 ## 절대 하지 말 것
 
-- 이 저장소를 public 으로 전환
-- `private_labels.csv` 를 참가자 저장소나 Drive 공유 폴더에 두기
-- `private_test` 가 포함된 원본 tar 를 공유 폴더에 두기
+- `private_labels.csv`를 이 저장소, 참가자 저장소, 또는 아무 Drive 공유 폴더에도 커밋/업로드하지 말 것 — 운영진 간 직접 전달(카톡/이메일 등)로만 공유
+- `private_test`가 포함된 원본 tar를 참가자와 공유하는 폴더에 두기
+- (이미 public이 된 뒤로는 특히) 정답이나 채점 대상 데이터를 이 저장소에 커밋하기
