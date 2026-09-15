@@ -28,8 +28,9 @@ tar -cf battery_lecture_sample.tar -C data_lecture train public_val
 
 ## 팀별 Macro F1 확인 (2회차 전날)
 
-**가장 쉬운 방법**: [`test_private.ipynb`](test_private.ipynb) 상단의 "Open in Colab" 배지를 눌러 열고,
-안내에 따라 셀을 실행하면 됩니다. 팀의 `best_model.pt`를 업로드하면 바로 Macro F1이 나옵니다.
+**가장 쉬운 방법**: 팀별 `best_model.pt`를 내 드라이브의 `MJY` 폴더에 모아두고,
+[`test_private.ipynb`](test_private.ipynb) 상단의 "Open in Colab" 배지를 눌러 연 다음
+**런타임 → 모두 실행**을 누르면 `MJY` 폴더 안 모든 팀의 Macro F1이 순서대로 출력됩니다.
 전체 절차(정답 파일 전달받기, 드라이브 데이터 준비 등)는 [`채점_진행_가이드.md`](채점_진행_가이드.md)를 참고하세요.
 
 로컬/터미널에서 직접 돌리고 싶다면 `score_checkpoint.py`를 씁니다:
@@ -53,7 +54,7 @@ python score_checkpoint.py \
 |---|---|
 | `make_lecture_subset.py` | 강의용 소규모 샘플 추출 (누수 없이) |
 | `score_checkpoint.py` | 체크포인트 하나의 Macro F1/Accuracy/클래스별 F1 확인 |
-| `test_private.ipynb` | 위 스크립트를 Colab에서 바로 실행하는 노트북 (Open in Colab) |
+| `test_private.ipynb` | 드라이브 `MJY` 폴더의 체크포인트를 Colab에서 일괄 채점하는 노트북 (Open in Colab) |
 | `battery_dataset.py`, `common.py` | 참가자 저장소와 동일한 사본 (독립 실행용) |
 | `채점_진행_가이드.md` | 운영진용 실행 가이드 (정답 파일 전달받기 → Colab 실행까지) |
 
